@@ -1,0 +1,23 @@
+{
+    "name": "ivan1029/kekxcel",
+    "description": "import/export excel test",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Annikangl",
+            "email": "svinpauk78@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "altorouter/altorouter": "1.1.0",
+        "phpoffice/phpspreadsheet": "^1.17",
+        "spatie/simple-excel": "^1.13"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "kekxcel\\" : "\\"
+        }
+    }
+}
