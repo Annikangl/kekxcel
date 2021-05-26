@@ -2,12 +2,12 @@
 
 namespace kekxcel\Models;
 
-class Model 
+use RedBean_SimpleModel;
+
+class Model extends RedBean_SimpleModel
 {
     protected $db = null;
 
-    public function __construct()
-    {
-        
-    }
+    
+    
 }

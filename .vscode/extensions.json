@@ -1,0 +1,6 @@
+{
+    "recommendations": [
+        "esbenp.prettier-vscode",
+        "lonefy.vscode-js-css-html-formatter"
+    ]
+}

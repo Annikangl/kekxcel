@@ -9,6 +9,8 @@ $router->setBasePath('/');
 
 $router->map('GET|POST', '', 'IndexController#index', 'index');
 $router->map('POST', 'import', 'IndexController#importExcelData', 'import');
+$router->map('POST', 'export', 'IndexController#exportDataToExcel', 'export');
+$router->map('POST', 'search', 'IndexController#searchData', 'search');
 
 $match = $router->match();
 
@@ -18,5 +20,6 @@ if (is_array($match)) {
     $obj = new $controller();
     call_user_func_array(array($obj,$action), array($match['params']));
 } else {
-    throw new \Exception("Страница не найдена", 404);
+    http_response_code(404);
+    include VIEW_PATH . '/Error/404.php';
 }

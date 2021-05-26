@@ -1,2 +1,68 @@
 1. Проверка на количество полей загружаемого документа
 2. Экспорт таблицы
+
+
+3. Фильтра 
+----------------------------
+input ФИО, ДР, паспорт (на каждое совпадение выводить кол-во найденных строк)
+
+
+4. Обработанные/ необработанные строки
+----------------------------
+Если *Примечание* == пустое - подсвечивать
+Если примечание != пусто - подсвечивать (зеленый)
+
+
+5. Хранение временной метки редактирования столбца
+
+
+            <!-- <?php foreach ($pageData['rows'] as $key => $row) : ?>
+                            <tr>
+
+                                <?php foreach ($row as $k2 => $item) : ?>
+                                    <td><?= $row[$k2]; ?></td>
+                                <?php endforeach; ?>
+
+                            </tr>
+                        <?php endforeach; ?> -->
+
+
+
+                        <!-- <tr>
+                                <td>11</td>
+                                <td>1421048448261517</td>
+                                <td>Иванов</td>
+                                <td>Иван</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>11/01/10</td>
+                                <td>Паспорт</td>
+                                <td>0099</td>
+                                <td>99999933</td>
+                                <td>12.05.2020</td>
+                                <td>МВД ДНР</td>
+                                <td>071 000 00 00</td>
+                                <td>IT</td>
+                                <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Officia dignissimos dolorem autem architecto facilis rem distinctio odio officiis vel, nesciunt debitis! Consectetur, eligendi. Ad odio eos accusamus, nemo, ipsum odit autem reprehenderit dolore facilis, minus tenetur ab consequuntur! Ea, quis inventore magni quos velit aliquid vel minima quasi doloremque ipsum?</td>
+                            </tr>
+                            <tr>
+                                <td>11</td>
+                                <td>1421048448261517</td>
+                                <td>Иванов</td>
+                                <td>Иван</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>Федорович</td>
+                                <td>11/01/10</td>
+                                <td>Паспорт</td>
+                                <td>0099</td>
+                                <td>99999933</td>
+                                <td>12.05.2020</td>
+                                <td>МВД ДНР</td>
+                                <td>071 000 00 00</td>
+                                <td>IT</td>
+                                <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Officia dignissimos dolorem autem architecto facilis rem distinctio odio officiis vel, nesciunt debitis! Consectetur, eligendi. Ad odio eos accusamus, nemo, ipsum odit autem reprehenderit dolore facilis, minus tenetur ab consequuntur! Ea, quis inventore magni quos velit aliquid vel minima quasi doloremque ipsum?</td>
+                            </tr> -->

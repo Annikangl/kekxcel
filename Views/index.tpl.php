@@ -1,123 +1,176 @@
-<?php
-// echo "<pre>";
-// print_r($pageData);
-// echo "</pre>";
-?>
+<?php include("./Views/layouts/header.tpl.php"); ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-
-<body>
-    <header class="header">
-        <nav class=" teal">
-            <div class="container">
-                <div class="nav-wrapper">
-                    <a href="#" class="brand-logo">Excel import/export</a>
-                    <ul id="nav-mobile" class="right hide-on-med-and-down">
-                        <li><a href="sass.html">Title</a></li>
-                    </ul>
+<main class="main">
+    <section class="form">
+        <div class="container">
+            <div class="row">
+                <div class="search__area">
+                    <form id="search_form">
+                        <div class="col s4">
+                            <input type="text" name="search-input" id="search-input" placeholder="Введите запрос">
+                        </div>
+                        <!-- <div class="col s4"> <input type="date" name="bithdate" placeholder="Дата
+                        рождения"> </div> <div class="col s4"> <input type="text" name="bithdate"
+                        placeholder="Серия и номер паспорта"> </div> <div class="col s2"> <button
+                        type="submit" class="btn" name="search-btn">Найти</button> </div> -->
+                    </form>
                 </div>
             </div>
-        </nav>
-    </header>
+            <div class="row">
+                <div class="message__area" style="display: none;">
+                    <div class="card-panel red lighten-4"></div>
+                </div>
 
-    <main class="main" style="margin-top: 80px;">
-        <section class="form">
-            <div class="container">
                 <div class="row">
-                    <div class="message__area" style="display: none;">
-                        <div class="card-panel red lighten-4"></div>
-                    </div>
-                    <form method="POST" id="import_excel_form" enctype="multipart/form-data">
-                        <div class="file-field input-field col s6">
-                            <div class="btn">
-                                <span>Выбрать файл</span>
-                                <input type="file" name="import_excel" multiple>
+
+                    <div class="col s8">
+                        <form method="POST" id="import_excel_form" class="upload-form" enctype="multipart/form-data">
+                            <div class="file-field input-field">
+                                <div class="btn">
+                                    <span>Выбрать файл</span>
+                                    <input type="file" name="import_excel">
+                                </div>
+                                <div class="file-path-wrapper">
+                                    <input class="file-path validate" type="text" placeholder="Загрузить .xls, .xlsx">
+                                </div>
                             </div>
-                            <div class="file-path-wrapper">
-                                <input class="file-path validate" type="text" placeholder="Загрузить .xls, .xlsx">
+
+                            <button class="btn waves-effect waves-light" type="submit" name="import" id="import">Импорт</button>
+                        </form>
+                    </div>
+
+                    <div class="col s4">
+                        <form name="export" id="export_form" method="POST" class="upload-form">
+                            <button class="btn waves-effect waves-light" type="submit" name="export" id="import">Экспорт</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <section class="section table-sec">
+        <div class="container">
+            <div class="table-wrapper">
+                <table id="data-table" class="centered">
+                    <thead>
+                        <tr>
+                            <th class="table__header" rowspan="2">№ п/п</th>
+                            <th class="table__header" rowspan="2">ID</th>
+                            <th class="table__header" rowspan="2">Фамилия</th>
+                            <th class="table__header" rowspan="2">Имя</th>
+                            <th class="table__header" rowspan="2">Отчество</th>
+                            <th class="table__header" rowspan="2">Дата рождения</th>
+                            <th class="table__header" rowspan="2">Место рождения</th>
+                            <th class="table__header" rowspan="2">Адрес регистрации</th>
+                            <th class="table__header" rowspan="2">Дата обращения</th>
+                            <th class="table__header" colspan="5">Документ гражданской принадлежности</th>
+                            <th class="table__header" rowspan="2">Номер мобильного телефона</th>
+                            <th class="table__header" rowspan="2">Место работы</th>
+                            <th class="table__header" rowspan="2">Примечание</th>
+                        </tr>
+                        <tr>
+                            <th class="table__header">Вид документа</th>
+                            <th class="table__header">Серия</th>
+                            <th class="table__header">Номер</th>
+                            <th class="table__header">Дата выдачи</th>
+                            <th class="table__header">Кем выдан</th>
+                        </tr>
+                    </thead>
+
+                    <div class="preloader center-align">
+                        <div class="preloader-wrapper big active">
+                            <div class="spinner-layer spinner-blue-only">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="gap-patch">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
                             </div>
                         </div>
-                        </br>
+                    </div>
 
-                        <button class="btn waves-effect waves-light" type="submit" name="import" id="import">Импорт</button>
-                    </form>
+                    <tbody id="table-body">
 
-                    <form name="export" method="POST">
-                        <button class="btn waves-effect waves-light" type="submit" name="export" id="import">Экспорт</button>
-                    </form>
-                </div>
+                    </tbody>
+                </table>
+
             </div>
-        </section>
-
-
-        <section class="table-sec">
-            <div class="table-container">
-                <div id="excel_area">
-                    <table class="centered" border="1">
-                        <thead>
-                            <tr>
-                                <th rowspan="2">№ п/п</th>
-                                <th rowspan="2">ID</th>
-                                <th rowspan="2">Фамилия</th>
-                                <th rowspan="2">Имя</th>
-                                <th rowspan="2">Отчество</th>
-                                <th rowspan="2">Дата рождения</th>
-                                <th rowspan="2">Место рождения</th>
-                                <th rowspan="2">Адрес регистрации</th>
-                                <th rowspan="2">Дата обращения</th>
-                                <th colspan="5">Документ гражданской принадлежности</th>
-                                <th rowspan="2">Номер мобильного телефона</th>
-                                <th rowspan="2">Место работы</th>
-                                <th rowspan="2">Примечание</th>
-                            </tr>
-                            <tr>
-                                <th>Вид документа</th>
-                                <th>Серия</th>
-                                <th>Номер</th>
-                                <th>Дата выдачи</th>
-                                <th>Кем выдан</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <tr>
-                                <td>11</td>
-                                <td>1421048448261517</td>
-                                <td>Иванов</td>
-                                <td>Иван</td>
-                                <td>Федорович</td>
-                                <td>Федорович</td>
-                                <td>Федорович</td>
-                                <td>Федорович</td>
-                                <td>11/01/10</td>
-                                <td>Паспорт</td>
-                                <td>0099</td>
-                                <td>99999933</td>
-                                <td>12.05.2020</td>
-                                <td>МВД ДНР</td>
-                                <td>071 000 00 00</td>
-                                <td>IT</td>
-                                <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Officia dignissimos dolorem autem architecto facilis rem distinctio odio officiis vel, nesciunt debitis! Consectetur, eligendi. Ad odio eos accusamus, nemo, ipsum odit autem reprehenderit dolore facilis, minus tenetur ab consequuntur! Ea, quis inventore magni quos velit aliquid vel minima quasi doloremque ipsum?</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+        </div>
+    </section>
+</main>
 </body>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
+<script src="./assets/libs/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+
+        load_data('GET', '', 'getData');
+
+        var upload_forms = $('.upload-form').hide();
+
+        // var search_block = $('.search__area').hide();
+
+        $('#upload-forms').on('click', function() {
+            upload_forms.slideToggle(300);
+            return false;
+        })
+
+        // $('#search').on('click', function () {
+        //     search_block.slideToggle(300);
+        //     return false;
+        // });
+
+        function load_data(method, url, query) {
+            $.ajax({
+                url: url,
+                method: method,
+                data: {
+                    query: query
+                },
+
+                beforeSend: function() {
+                    $(".preloader").show();
+                },
+
+                success: function(data) {
+                    $('#table-body').html(data);
+                },
+
+                complete: function() {
+                    $(".preloader").hide();
+                    
+                    // Подсветка необработанных полей
+                    highlightTableRows();
+                },
+
+                error: function(jqXHR, excepriont) {
+                    console.log('Error');
+                    var message = '<div class="card-panel red lighten-2">Ошибка сервера</div>';
+                    $('#table-body').html(message);
+                }
+            })
+        }
+
+        $('#search-input').keyup(function() {
+
+            search_query = $('#search-input').val();
+
+            load_data('POST', 'search', search_query);
+
+            // if (search_query != '') {
+            //     load_data('POST', 'search', search_query);
+            // } else {
+            //     load_data('GET', '');
+            // }
+
+        })
+
         $('#import_excel_form').on('submit', function(e) {
             e.preventDefault();
 
@@ -130,21 +183,61 @@
                 cache: false,
                 processData: false,
 
-                beforeSend: function() {
-
-                },
+                beforeSend: function() {},
 
                 success: function(data) {
+                    load_data('GET', '', 'getData');
                     console.log(data);
-                    // location.reload();
-                },
-
-                complete: function(msg) {
-                    console.log(msg);
                 }
 
             })
         })
+
+        $('#export_form').on('submit', function(e) {
+            e.preventDefault();
+
+            var table_headers = [];
+
+            $.each($('.table__header'), function(index, value) {
+                table_headers.push(value.textContent);
+            })
+
+            $.ajax({
+                url: 'export',
+                method: 'POST',
+                data: JSON.stringify(table_headers),
+                dataType: 'binary',
+                xhrFields: {
+                    'responseType': 'blob'
+                },
+
+                success: function(data) {
+                    var link = document.createElement('a'),
+                        filename = 'file.xlsx';
+                    link.href = URL.createObjectURL(data);
+                    link.download = filename;
+                    link.click();
+                    console.log(data);
+                },
+
+                error: function(err) {
+                    console.log('Error');
+                }
+            })
+        })
+
+
+
+        function highlightTableRows() {
+            var tbody = $('#table-body');
+            var comments = tbody.find(".table__content-comment");
+
+            comments.each(function(index, value) {
+                if ($(this).text() === "") {
+                    $(this).parent().addClass("unprocessed");
+                }
+            })
+        }
     })
 </script>
 
