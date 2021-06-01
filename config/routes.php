@@ -11,6 +11,8 @@ $router->map('GET|POST', '', 'IndexController#index', 'index');
 $router->map('POST', 'import', 'IndexController#importExcelData', 'import');
 $router->map('POST', 'export', 'IndexController#exportDataToExcel', 'export');
 $router->map('POST', 'search', 'IndexController#searchData', 'search');
+$router->map('GET|POST', 'updatefield', 'IndexController#updateComment', 'update-field');
+
 
 $match = $router->match();
 

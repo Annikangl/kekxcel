@@ -14,6 +14,20 @@ class IndexModel extends Model
         return $rows;
     }
 
+    public static function getTableDataBySearch($search) {
+        $sql =  "
+        SELECT * FROM exceldata 
+            WHERE first_name LIKE '%".$search."%'
+            OR last_name LIKE '%".$search."%' 
+            OR middle_name LIKE '%".$search."%' 
+            OR birthdate LIKE '%".$search."%' 
+            OR document_series LIKE '%".$search."%'
+            OR document_number LIKE '%".$search."%'
+            ORDER BY number";
+
+       return \R::getAssoc($sql);
+    }
+
     public static function insertData($table,$insertData) {
 
         $table = \R::dispense($table);
@@ -67,27 +81,14 @@ class IndexModel extends Model
                                             ]);
 
         return $inserting;
+    }
 
-        // $table->number = $insertData['number'];
-        // $table->db_id = $insertData['db_id'];
-        // $table->first_name = $insertData['first_name'];
-        // $table->last_name = $insertData['last_name'];
-        // $table->middle_name = $insertData['middle_name'];
-        // $table->birthdate = $insertData['birthdate'];
-        // $table->birth_place = $insertData['birth_place'];
-        // $table->adress = $insertData['adress'];
-        // $table->request_date = $insertData['request_date'];
-        // $table->document_type = $insertData['document_type'];
-        // $table->document_series = $insertData['document_series'];
-        // $table->document_number = $insertData['document_number'];
-        // $table->document_date = $insertData['document_date'];
-        // $table->document_issue = $insertData['document_issue'];
-        // $table->phone = $insertData['phone'];
-        // $table->work_place = $insertData['work_place'];
-        // $table->comment = $insertData['comment'];
-
-        // \R::store($table);
-        
+    public static function updateFieldById($id, $value) {
+        $id = intval($id);
+        $table = \R::load('exceldata', $id);
+        $table->comment = $value;
+        $result =  \R::store($table);
+        return $result;
     }
 
     public static function getColums($table) {

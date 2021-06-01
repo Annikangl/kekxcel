@@ -4,17 +4,15 @@
     <section class="form">
         <div class="container">
             <div class="row">
+
                 <div class="search__area">
                     <form id="search_form">
                         <div class="col s4">
                             <input type="text" name="search-input" id="search-input" placeholder="Введите запрос">
                         </div>
-                        <!-- <div class="col s4"> <input type="date" name="bithdate" placeholder="Дата
-                        рождения"> </div> <div class="col s4"> <input type="text" name="bithdate"
-                        placeholder="Серия и номер паспорта"> </div> <div class="col s2"> <button
-                        type="submit" class="btn" name="search-btn">Найти</button> </div> -->
                     </form>
                 </div>
+
             </div>
             <div class="row">
                 <div class="message__area" style="display: none;">
@@ -22,7 +20,6 @@
                 </div>
 
                 <div class="row">
-
                     <div class="col s8">
                         <form method="POST" id="import_excel_form" class="upload-form" enctype="multipart/form-data">
                             <div class="file-field input-field">
@@ -80,19 +77,17 @@
                     </thead>
 
                     <div class="preloader center-align">
-                        <div class="preloader-wrapper big active">
-                            <div class="spinner-layer spinner-blue-only">
-                                <div class="circle-clipper left">
-                                    <div class="circle"></div>
-                                </div>
-                                <div class="gap-patch">
-                                    <div class="circle"></div>
-                                </div>
-                                <div class="circle-clipper right">
-                                    <div class="circle"></div>
-                                </div>
-                            </div>
+                    <div class="preloader-wrapper small active">
+                        <div class="spinner-layer spinner-green-only">
+                        <div class="circle-clipper left">
+                            <div class="circle"></div>
+                        </div><div class="gap-patch">
+                            <div class="circle"></div>
+                        </div><div class="circle-clipper right">
+                            <div class="circle"></div>
                         </div>
+                        </div>
+                    </div>
                     </div>
 
                     <tbody id="table-body">
@@ -110,64 +105,64 @@
 <script>
     $(document).ready(function() {
 
+        var loader = $(".preloader");
         load_data('GET', '', 'getData');
 
         var upload_forms = $('.upload-form').hide();
-
-        // var search_block = $('.search__area').hide();
 
         $('#upload-forms').on('click', function() {
             upload_forms.slideToggle(300);
             return false;
         })
 
+        // var search_block = $('.search__area').hide();
+
         // $('#search').on('click', function () {
         //     search_block.slideToggle(300);
         //     return false;
         // });
 
+        
+
         function load_data(method, url, query) {
+
             $.ajax({
                 url: url,
                 method: method,
                 data: {
                     query: query
                 },
+                
 
                 beforeSend: function() {
-                    $(".preloader").show();
+                    loader.show();
                 },
 
                 success: function(data) {
                     $('#table-body').html(data);
+
+                    
                 },
 
                 complete: function() {
-                    $(".preloader").hide();
-                    
-                    // Подсветка необработанных полей
+                    loader.hide();
+                    // saveEditElement();
+                    showEditableElement();
                     highlightTableRows();
                 },
 
                 error: function(jqXHR, excepriont) {
-                    console.log('Error');
-                    var message = '<div class="card-panel red lighten-2">Ошибка сервера</div>';
+                    var message = '<div class="center-align card-panel red lighten-2">Ошибка сервера</div>';
                     $('#table-body').html(message);
                 }
             })
         }
 
-        $('#search-input').keyup(function() {
+        $('#search-input').on('keyup', function() {
 
-            search_query = $('#search-input').val();
+            var search_query = $(this).val().trim();
 
             load_data('POST', 'search', search_query);
-
-            // if (search_query != '') {
-            //     load_data('POST', 'search', search_query);
-            // } else {
-            //     load_data('GET', '');
-            // }
 
         })
 
@@ -183,12 +178,9 @@
                 cache: false,
                 processData: false,
 
-                beforeSend: function() {},
-
                 success: function(data) {
                     load_data('GET', '', 'getData');
-                    console.log(data);
-                }
+                },
 
             })
         })
@@ -217,16 +209,19 @@
                     link.href = URL.createObjectURL(data);
                     link.download = filename;
                     link.click();
-                    console.log(data);
+                    // console.log(data);
                 },
 
                 error: function(err) {
-                    console.log('Error');
+                    console.log('Error export');
+                    var message = '<div class="center-align card-panel red lighten-2">Ошибка сервера</div>';
+                    $('#table-body').html(message);
                 }
             })
         })
 
 
+    // Подсветка необработанных полей
 
         function highlightTableRows() {
             var tbody = $('#table-body');
@@ -234,11 +229,105 @@
 
             comments.each(function(index, value) {
                 if ($(this).text() === "") {
-                    $(this).parent().addClass("unprocessed");
+                    $(this).parent().toggleClass("unprocessed");
                 }
             })
         }
+
+        // Edit column
+
+        function showEditableElement() {
+            var editableElement = $('.table__content-comment');
+            editableElement.on('click', function() {
+                $(this).addClass('editable-active');
+            })
+
+            editableElement.on('blur', function() {
+                var newValue = $(this).text();
+                var id = $(this).attr('data-id');
+                saveEditableElement($(this), newValue, id);
+            })
+        }
+
+        /* saveEditableElement ()*/
+        function saveEditableElement(editableElement, newValue, id) {
+            editableElement.removeClass('editable-active');
+            console.log(`id:  ${id} value: ${newValue}`);
+
+            if (id != '') {
+                $.ajax({
+                    url: 'updatefield',
+                    method: 'POST',
+                    data: {
+                        id: id,
+                        value: newValue
+                    },
+
+                    success: function(response) {
+                        highlightTableRows();
+                        
+                        // alert("Данные успешно обновлены!");
+                    },
+
+                    error: function(err) {
+                        console.log('Query error ' + err);
+                    }
+                })
+            }
+            
+        }
+    
+
+        // function saveEditElement() {
+        //     var editableElement = $('.table__content-comment');
+        //     editableElement.on('click', function() {
+        //         $(this).addClass('editable-active');
+                
+        //         $(this).blur(function(event) {
+
+        //             var newValue = $(this).text();
+        //             var id = $(this).attr('data-id');
+
+        //             if (id != '') {
+        //                 $.ajax({
+        //                     url: 'updatefield',
+        //                     method: 'POST',
+        //                     data: {
+        //                         id: id, 
+        //                         value: newValue
+        //                     },
+
+        //                     success: function(response) {
+        //                         highlightTableRows();
+        //                         // location.reload();
+        //                         // response != '' ? alert("Запись успешно обновлена") : alert("Ошибка");
+                                
+        //                     },
+
+        //                     complete: function() {
+        //                         console.log(event.target);
+        //                     },
+
+        //                     error: function(e) {
+        //                         console.log('Error ' + e);
+        //                     }
+        //                 })
+        //             }
+
+                   
+        //             $(this).removeClass('editable-active');
+                    
+        //         })
+        //     })
+
+            
+            
+        //}
+      
+
+
     })
+
 </script>
 
 </html>

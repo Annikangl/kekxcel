@@ -11,6 +11,10 @@
     white-space: nowrap;
 }
 
+.editable-active {
+    background-color: #d2d9e6;
+}
+
 .unprocessed {
     background-color: #ef9a9a;
 }

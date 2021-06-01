@@ -2,7 +2,6 @@
 
 namespace kekxcel\Controllers;
 
-use Db;
 use kekxcel\Models\IndexModel;
 use kekxcel\Views\View;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -15,29 +14,33 @@ class IndexController extends Controller
 
     private static $table = 'exceldata';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->model = new IndexModel();
         $this->view = new View();
     }
 
     
 
-    public function index()
-    {
+    public function index() {
+
         if (isset($_POST['export'])) {
             $this->exportDataToExcel();
         } elseif (isset($_FILES['import_excel']) && $_FILES["import_excel"]["name"] != '') {
             $this->importExcelData();
         } elseif (isset($_GET['query'])) {
-            echo $this->getTableData(self::$table);
+            $this->getTableData(self::$table);
             return;
         }
-
+     
         $this->view->render('/Views/index.tpl.php', $this->pageData);
     }
 
-    // Полученные данных из БД
+    /*
+     getTableData
+     Достает данных из БД и отправляет на клиент
+     @params: table - имя таблицы в БД
+
+    */
     public function getTableData($table) {
  
         $rows = IndexModel::getTableData($table);
@@ -62,33 +65,39 @@ class IndexController extends Controller
                 <td>'.$row["document_issue"].'</td>
                 <td>'.$row["phone"].'</td>
                 <td>'.$row["work_place"].'</td>
-                <td class = table__content-comment>'.$row["comment"].'</td>
+                <td contenteditable="true" class = table__content-comment data-id='. $row['db_id'].'>'.$row["comment"].'</td>
             </tr>
            ';
         }
 
-        return $response;
+        echo $response;
     }
+
+/*
+    exportDataToExcel()
+    Экспортирует HTML таблицу в файл с расширением .xlsx
+
+    TODO
+    Переписать костыли для colums и subColums
+*/
 
     public function exportDataToExcel() {
 
         $colums = json_decode(file_get_contents('php://input'));
+
         // Список полей таблицы
         $colums = array_combine(range(1, count($colums)),$colums);
         $subColums = array_slice($colums,10);
         $subColums = array_combine(range(1, count($subColums)), $subColums);
         $colums = array_diff($colums, $subColums);
         $fileExtension = 'xlsx';
-        
-        
       
         $file = new Spreadsheet();
         $active_sheet = $file->getActiveSheet();
 
-        
-
         $alphabet = range('A', 'Z');
         $subAlphabet = range('J','Q');
+
         // Смещение индексов на 1
         $alphabet = array_combine(range(1, count($alphabet)), $alphabet);
         $subAlphabet = array_combine(range(1, count($subAlphabet)), $subAlphabet);
@@ -100,12 +109,6 @@ class IndexController extends Controller
 
         $subColums = array_values($subColums);
         $subColums = array_combine(range(1, count($subColums)), $subColums);
-
-        // print_r($colums);
-        // echo "\n";
-        // print_r($subColums);
-        // echo "\n";
-        // print_r($subAlphabet);
 
 
         for ($i = 1; $i < count($colums); $i++) {
@@ -144,12 +147,20 @@ class IndexController extends Controller
         $file_name = time() . '.' . strtolower($fileExtension);
 
         $writer->save($file_name);
-        $this->setHeaders($file_name);
 
         readfile($file_name);
         unlink($file_name);
     }
 
+
+/*
+    importExcelData()
+    Импортирует данные из Excel файла,
+    путем считывания этого файла и записи считанныз данных в БД
+
+    TODO
+    
+*/
     public function importExcelData() {
         $allowed_extension = ['xls', 'xlsx'];
         $file_name = $_FILES['import_excel']['name'];
@@ -175,11 +186,6 @@ class IndexController extends Controller
             $allColums = array_merge($colums,$subColums);
 
             $insertData = [];
-
-            // print_r($colums) ."\n";
-            // print_r($subColums) . "\n";
-            // print_r($spreadSheetAry);
-
             
             for ($i = 2; $i <= count($spreadSheetAry); $i++) {
                 if (isset($spreadSheetAry[$i][2]) && $spreadSheetAry[$i] != '') {
@@ -212,18 +218,11 @@ class IndexController extends Controller
 
     public function searchData() {
         $table = self::$table;
-        $search = $_POST['query'];
-        $sql =  "
-        SELECT * FROM exceldata 
-            WHERE first_name LIKE '%".$search."%'
-            OR last_name LIKE '%".$search."%' 
-            OR middle_name LIKE '%".$search."%' 
-            OR birthdate LIKE '%".$search."%' 
-            OR document_series LIKE '%".$search."%'
-       ";
+        $search = strip_tags($_POST['query']);
+
+        $rows = IndexModel::getTableDataBySearch($search);
 
         $response = '';
-        $rows = \R::getAssoc($sql);
 
         foreach ($rows as $row) {
             $response .= '
@@ -244,13 +243,37 @@ class IndexController extends Controller
                 <td>' . $row["document_issue"] . '</td>
                 <td>' . $row["phone"] . '</td>
                 <td>' . $row["work_place"] . '</td>
-                <td class = `table__content-comment`>' . $row["comment"] . '</td>
+                <td class =table__content-comment>' . $row["comment"] . '</td>
             </tr>
            ';
         }
 
         echo $response;
     }
+
+    /* 
+        updateComment
+        Обновляет поле comment в БД
+    */
+    
+    public function updateComment() {
+        if (isset($_POST['id']) && isset($_POST['value'])) {
+            $id = $_POST['id'];
+            $value = $_POST['value'];
+
+            if ($id) {
+                $result = IndexModel::updateFieldById($id, $value);
+            }
+
+        }
+    }
+
+    /* 
+    setHeaders
+    Устанавливает специальные заголовки для загрузки файла
+
+    @params: string: file_name - имя файла
+    */
 
     private function setHeaders($file_name) {
         return [
@@ -259,6 +282,5 @@ class IndexController extends Controller
             header("Content-disposition: attachment; filename=\"" . $file_name . "\"")
         ];
     }
-
     
 }
