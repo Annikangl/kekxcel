@@ -103,8 +103,10 @@
 
 <script src="./assets/libs/jquery-3.6.0.min.js"></script>
 <script>
+
     $(document).ready(function() {
 
+        var message = null;
         var loader = $(".preloader");
         load_data('GET', '', 'getData');
 
@@ -114,14 +116,6 @@
             upload_forms.slideToggle(300);
             return false;
         })
-
-        // var search_block = $('.search__area').hide();
-
-        // $('#search').on('click', function () {
-        //     search_block.slideToggle(300);
-        //     return false;
-        // });
-
         
 
         function load_data(method, url, query) {
@@ -140,8 +134,6 @@
 
                 success: function(data) {
                     $('#table-body').html(data);
-
-                    
                 },
 
                 complete: function() {
@@ -152,7 +144,7 @@
                 },
 
                 error: function(jqXHR, excepriont) {
-                    var message = '<div class="center-align card-panel red lighten-2">Ошибка сервера</div>';
+                    message = '<div class="center-align card-panel red lighten-2">Ошибка сервера</div>';
                     $('#table-body').html(message);
                 }
             })
@@ -180,7 +172,14 @@
 
                 success: function(data) {
                     load_data('GET', '', 'getData');
+                    console.log(data);
+                  
                 },
+
+                complete: function() {
+                    message = '<span>Данные успешно загружены!</span>';
+                    M.toast({html: message});
+                }
 
             })
         })
@@ -209,13 +208,11 @@
                     link.href = URL.createObjectURL(data);
                     link.download = filename;
                     link.click();
-                    // console.log(data);
                 },
 
                 error: function(err) {
-                    console.log('Error export');
-                    var message = '<div class="center-align card-panel red lighten-2">Ошибка сервера</div>';
-                    $('#table-body').html(message);
+                    message = '<span>Ошибка экспорта данных!</span>';
+                    M.toast({html: message});
                 }
             })
         })
@@ -234,7 +231,11 @@
             })
         }
 
-        // Edit column
+        /*
+        showEditableElement
+        добавляет/удаляет активный класс редактируемого элемента и
+        сохраняет новое значение в БД
+        */
 
         function showEditableElement() {
             var editableElement = $('.table__content-comment');
@@ -249,10 +250,14 @@
             })
         }
 
-        /* saveEditableElement ()*/
+        /* 
+        saveEditableElement()
+        @params: editableElement - редактируемый элемент
+                 newValue - измененное значение
+                 id - id строки в БД по которой будет update
+        */
         function saveEditableElement(editableElement, newValue, id) {
             editableElement.removeClass('editable-active');
-            console.log(`id:  ${id} value: ${newValue}`);
 
             if (id != '') {
                 $.ajax({
@@ -265,67 +270,18 @@
 
                     success: function(response) {
                         highlightTableRows();
-                        
-                        // alert("Данные успешно обновлены!");
                     },
 
                     error: function(err) {
                         console.log('Query error ' + err);
+                        message = ''
                     }
                 })
             }
             
         }
     
-
-        // function saveEditElement() {
-        //     var editableElement = $('.table__content-comment');
-        //     editableElement.on('click', function() {
-        //         $(this).addClass('editable-active');
-                
-        //         $(this).blur(function(event) {
-
-        //             var newValue = $(this).text();
-        //             var id = $(this).attr('data-id');
-
-        //             if (id != '') {
-        //                 $.ajax({
-        //                     url: 'updatefield',
-        //                     method: 'POST',
-        //                     data: {
-        //                         id: id, 
-        //                         value: newValue
-        //                     },
-
-        //                     success: function(response) {
-        //                         highlightTableRows();
-        //                         // location.reload();
-        //                         // response != '' ? alert("Запись успешно обновлена") : alert("Ошибка");
-                                
-        //                     },
-
-        //                     complete: function() {
-        //                         console.log(event.target);
-        //                     },
-
-        //                     error: function(e) {
-        //                         console.log('Error ' + e);
-        //                     }
-        //                 })
-        //             }
-
-                   
-        //             $(this).removeClass('editable-active');
-                    
-        //         })
-        //     })
-
-            
-            
-        //}
       
-
-
     })
 
 </script>

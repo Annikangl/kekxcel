@@ -6,13 +6,11 @@ use kekxcel\Models\IndexModel;
 use kekxcel\Views\View;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
+use PhpOffice\PhpSpreadsheet\Style\{Font, Border, Alignment};
 
 
 class IndexController extends Controller
 {
-
-    private static $table = 'exceldata';
 
     public function __construct() {
         $this->model = new IndexModel();
@@ -28,7 +26,7 @@ class IndexController extends Controller
         } elseif (isset($_FILES['import_excel']) && $_FILES["import_excel"]["name"] != '') {
             $this->importExcelData();
         } elseif (isset($_GET['query'])) {
-            $this->getTableData(self::$table);
+            $this->getTableData();
             return;
         }
      
@@ -41,9 +39,9 @@ class IndexController extends Controller
      @params: table - имя таблицы в БД
 
     */
-    public function getTableData($table) {
+    public function getTableData() {
  
-        $rows = IndexModel::getTableData($table);
+        $rows = IndexModel::getTableData();
         $response = '';
 
         foreach ($rows as $row) {
@@ -83,14 +81,14 @@ class IndexController extends Controller
 
     public function exportDataToExcel() {
 
+        $fileExtension = 'xlsx';
         $colums = json_decode(file_get_contents('php://input'));
 
         // Список полей таблицы
         $colums = array_combine(range(1, count($colums)),$colums);
-        $subColums = array_slice($colums,10);
-        $subColums = array_combine(range(1, count($subColums)), $subColums);
+        $subColums = array_slice($colums,13);
+
         $colums = array_diff($colums, $subColums);
-        $fileExtension = 'xlsx';
       
         $file = new Spreadsheet();
         $active_sheet = $file->getActiveSheet();
@@ -98,38 +96,72 @@ class IndexController extends Controller
         $alphabet = range('A', 'Z');
         $subAlphabet = range('J','Q');
 
-        // Смещение индексов на 1
+        // // Смещение индексов алфавита
         $alphabet = array_combine(range(1, count($alphabet)), $alphabet);
         $subAlphabet = array_combine(range(1, count($subAlphabet)), $subAlphabet);
 
-        for ($i = 1; $i <= 3; $i++) {
-            array_push($subColums, $subColums[$i]);
-            unset($subColums[$i]);
-        }
-
         $subColums = array_values($subColums);
         $subColums = array_combine(range(1, count($subColums)), $subColums);
-
 
         for ($i = 1; $i < count($colums); $i++) {
             
             if (preg_match('~Документ гражданской~',$colums[$i])) {
                 $active_sheet->mergeCells('J1:N1');
-              
+                $active_sheet->setCellValue($alphabet[$i] . '1', $colums[$i]);
+             
+                $active_sheet->setCellValue($alphabet[$i+5] . '1', $colums[$i+1]);
+                $active_sheet->setCellValue($alphabet[$i+6] . '1', $colums[$i+2]);
+                $active_sheet->setCellValue($alphabet[$i+7] . '1', $colums[$i+3]);
             }
-            
+
             $active_sheet->setCellValue($alphabet[$i] . '1', $colums[$i]);
+            $active_sheet->getStyle($alphabet[$i] . '1')->applyFromArray([
+                'font' => [
+                    'bold' => true
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_MEDIUM,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ]
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ]);
         }
 
         for ($i = 1; $i <= count($subColums); $i++) {
             $active_sheet->setCellValue($subAlphabet[$i] . '2', $subColums[$i]);
+            $active_sheet->getStyle($subAlphabet[$i] . '2')->applyFromArray([
+                'font' => [
+                    'bold' => true
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_MEDIUM,
+                        'color' => [
+                            'rgb' => '808080'
+                        ]
+                    ]
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ]);
         }
 
         $active_sheet->getColumnDimension('A')->setWidth(50);
         $active_sheet->getRowDimension(1)->setRowHeight(50);
 
         $count = 3;
-        $rows = IndexModel::getTableData(self::$table);
+        $rows = IndexModel::getTableData();
 
 
         foreach ($rows as $row) {
@@ -157,8 +189,6 @@ class IndexController extends Controller
     importExcelData()
     Импортирует данные из Excel файла,
     путем считывания этого файла и записи считанныз данных в БД
-
-    TODO
     
 */
     public function importExcelData() {
@@ -195,29 +225,28 @@ class IndexController extends Controller
                     $insertData['first_name'] = $spreadSheetAry[$i][2];
                     $insertData['last_name'] = $spreadSheetAry[$i][3];
                     $insertData['middle_name'] = $spreadSheetAry[$i][4];
-                    $insertData['birthdate'] = $spreadSheetAry[$i][5];
+                    $insertData['birthdate'] = date("Y-m-d", strtotime($spreadSheetAry[$i][5]));
                     $insertData['birth_place'] = $spreadSheetAry[$i][6];
                     $insertData['adress'] = $spreadSheetAry[$i][7];
-                    $insertData['request_date'] = $spreadSheetAry[$i][8];
+                    $insertData['request_date'] = date("Y-m-d",  strtotime($spreadSheetAry[$i][8]));
                     $insertData['document_type'] = $spreadSheetAry[$i][9];
                     $insertData['document_series'] = $spreadSheetAry[$i][10];
-                    $insertData['document_number']= $spreadSheetAry[$i][11];
-                    $insertData['document_date'] = $spreadSheetAry[$i][12];
+                    $insertData['document_number'] = $spreadSheetAry[$i][11];
+                    $insertData['document_date'] = date("Y-m-d", strtotime($spreadSheetAry[$i][12]));
                     $insertData['document_issue'] = $spreadSheetAry[$i][13];
                     $insertData['phone'] = $spreadSheetAry[$i][14];
                     $insertData['work_place'] = $spreadSheetAry[$i][15];
                     $insertData['comment'] = $spreadSheetAry[$i][16];
 
-                    var_dump(IndexModel::insertData(self::$table, $insertData));
+                    IndexModel::insertData($insertData);
                 }
             }
         } else {
-            $this->pageData['message'] = ' Error type of file';
+            $response = 'Error type of file';
         }
     }
 
     public function searchData() {
-        $table = self::$table;
         $search = strip_tags($_POST['query']);
 
         $rows = IndexModel::getTableDataBySearch($search);

@@ -4,20 +4,21 @@ namespace kekxcel\Models;
 
 class IndexModel extends Model
 {
+
+    protected static $table = 'exceldata';
     
-    public static function getTableData($table) {
+    public static function getTableData() {
         $rows = \R::getAll("SELECT `number`, `db_id`, `first_name`, `last_name`, `middle_name`,
                                     `birthdate`, `birth_place`, `adress`, `request_date`, `document_type`,`document_series`,
                                     `document_number`,`document_date`,`document_issue`,`phone`,`work_place`, `comment`
-                            FROM $table ORDER BY number");
+                            FROM " . self::$table . " ORDER BY number");
         
         return $rows;
     }
 
     public static function getTableDataBySearch($search) {
-        $sql =  "
-        SELECT * FROM exceldata 
-            WHERE first_name LIKE '%".$search."%'
+        $sql = "
+        SELECT * FROM " . self::$table . " WHERE first_name LIKE '%".$search."%'
             OR last_name LIKE '%".$search."%' 
             OR middle_name LIKE '%".$search."%' 
             OR birthdate LIKE '%".$search."%' 
@@ -28,9 +29,9 @@ class IndexModel extends Model
        return \R::getAssoc($sql);
     }
 
-    public static function insertData($table,$insertData) {
+    public static function insertData($insertData) {
 
-        $table = \R::dispense($table);
+        $table = \R::dispense(self::$table);
 
         $id = $insertData['db_id'];
         $number = $insertData['number'];
@@ -51,7 +52,7 @@ class IndexModel extends Model
         $work_place = $insertData['work_place'];
         $comment = $insertData['comment'];
 
-        $inserting = \R::exec('INSERT INTO `exceldata` (id,number,db_id,first_name,last_name,middle_name,birthdate,birth_place,adress,request_date,document_type,document_series,
+        $response = \R::exec('INSERT INTO ' . self::$table . ' (id,number,db_id,first_name,last_name,middle_name,birthdate,birth_place,adress,request_date,document_type,document_series,
                                             document_number,document_date,document_issue,phone,work_place,comment) 
                                             VALUES (:id,:number,:db_id,:first_name,:last_name,:middle_name,
                                             :birthdate,:birth_place,:adress,:request_date,:document_type,:document_series,:document_number,:document_date,:document_issue,
@@ -80,15 +81,15 @@ class IndexModel extends Model
                                                 ':comment' => $comment
                                             ]);
 
-        return $inserting;
+        return $response;
     }
 
     public static function updateFieldById($id, $value) {
         $id = intval($id);
-        $table = \R::load('exceldata', $id);
+        $table = \R::load(self::$table, $id);
         $table->comment = $value;
-        $result =  \R::store($table);
-        return $result;
+        $response =  \R::store($table);
+        return $response;
     }
 
     public static function getColums($table) {
