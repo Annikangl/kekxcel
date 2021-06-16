@@ -51,16 +51,19 @@ class IndexModel extends Model
         $phone = $insertData['phone'];
         $work_place = $insertData['work_place'];
         $comment = $insertData['comment'];
+        $import_time = $insertData['import_time'];
 
         $response = \R::exec('INSERT INTO ' . self::$table . ' (id,number,db_id,first_name,last_name,middle_name,birthdate,birth_place,adress,request_date,document_type,document_series,
-                                            document_number,document_date,document_issue,phone,work_place,comment) 
+                                            document_number,document_date,document_issue,phone,work_place,comment, import_time) 
                                             VALUES (:id,:number,:db_id,:first_name,:last_name,:middle_name,
                                             :birthdate,:birth_place,:adress,:request_date,:document_type,:document_series,:document_number,:document_date,:document_issue,
-                                            :phone,:work_place,:comment)
-                                            ON DUPLICATE KEY UPDATE number = :number, db_id = :db_id, first_name = :first_name,last_name = :last_name,middle_name = :middle_name,
-                                            birthdate = :birthdate,birth_place = :birth_place,adress = :adress,request_date = :request_date,document_type = :document_type,
-                                            document_series = :document_series,document_number = :document_number,document_date = :document_date,document_issue = :document_issue,
-                                            phone = :phone,work_place = :work_place,comment = :comment', [
+                                            :phone,:work_place,:comment, :import_time)
+
+                                            ON DUPLICATE KEY UPDATE 
+                                                number = :number, db_id = :db_id, first_name = :first_name,last_name = :last_name,middle_name = :middle_name,
+                                                birthdate = :birthdate,birth_place = :birth_place,adress = :adress,request_date = :request_date,document_type = :document_type,
+                                                document_series = :document_series,document_number = :document_number,document_date = :document_date,document_issue = :document_issue,
+                                                phone = :phone,work_place = :work_place,comment = :comment', [
                                                 ':id' => $id,
                                                 ':number' => $number,
                                                 ':db_id' => $db_id,
@@ -78,7 +81,8 @@ class IndexModel extends Model
                                                 ':document_issue' => $document_issue,
                                                 ':phone' => $phone,
                                                 ':work_place' => $work_place,
-                                                ':comment' => $comment
+                                                ':comment' => $comment,
+                                                'import_time' => $import_time
                                             ]);
 
         return $response;
@@ -96,4 +100,19 @@ class IndexModel extends Model
         return array_keys(\R::inspect($table));
     }
 
+    public static function getImportTime() {
+        $table = self::$table;
+        $result = \R::getAssoc('SELECT DISTINCT import_time FROM ' . $table);
+        return $result;
+    }
+
+    public static function getDataByTimestamp($timestamp) {
+        $rows = \R::getAll("SELECT `number`, `db_id`, `first_name`, `last_name`, `middle_name`,
+                            `birthdate`, `birth_place`, `adress`, `request_date`, `document_type`,`document_series`,
+                            `document_number`,`document_date`,`document_issue`,`phone`,`work_place`, `comment`
+                            FROM " . self::$table . " WHERE import_time = ?" . " ORDER BY number", [$timestamp]);
+
+        return $rows;
+
+    }
 }

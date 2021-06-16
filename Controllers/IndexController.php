@@ -27,9 +27,10 @@ class IndexController extends Controller
             $this->importExcelData();
         } elseif (isset($_GET['query'])) {
             $this->getTableData();
+
             return;
         }
-     
+        $this->pageData['timestamp'] = $this->getTimestampFields();
         $this->view->render('/Views/index.tpl.php', $this->pageData);
     }
 
@@ -40,7 +41,8 @@ class IndexController extends Controller
 
     */
     public function getTableData() {
- 
+        
+       
         $rows = IndexModel::getTableData();
         $response = '';
 
@@ -216,6 +218,7 @@ class IndexController extends Controller
             $allColums = array_merge($colums,$subColums);
 
             $insertData = [];
+            $import_time = date("Y-m-d H:i");
             
             for ($i = 2; $i <= count($spreadSheetAry); $i++) {
                 if (isset($spreadSheetAry[$i][2]) && $spreadSheetAry[$i] != '') {
@@ -237,6 +240,7 @@ class IndexController extends Controller
                     $insertData['phone'] = $spreadSheetAry[$i][14];
                     $insertData['work_place'] = $spreadSheetAry[$i][15];
                     $insertData['comment'] = $spreadSheetAry[$i][16];
+                    $insertData['import_time'] = $import_time;
 
                     IndexModel::insertData($insertData);
                 }
@@ -297,6 +301,50 @@ class IndexController extends Controller
         }
     }
 
+    public function getTimestampFields() {
+        return IndexModel::getImportTime();
+    }
+ 
+    public function sortByTime() {
+        // $format = "Y-m-d H:i:s";
+
+        // var_dump(DateTime::createFromFormat($format, '2021-09-09 17:58:10'));
+        $response = '';
+        if (isset($_GET['query'])) {
+            $timestamp = $_GET['query'];
+
+            $rows = IndexModel::getDataByTimestamp($timestamp);
+
+            foreach ($rows as $row) {
+                $response .= '
+                <tr>
+                    <td>' . $row["number"] . '</td>
+                    <td>' . $row["db_id"] . '</td>
+                    <td>' . $row["first_name"] . '</td>
+                    <td>' . $row["last_name"] . '</td>
+                    <td>' . $row["middle_name"] . '</td>
+                    <td>' . $row["birthdate"] . '</td>
+                    <td>' . $row["birth_place"] . '</td>
+                    <td>' . $row["adress"] . '</td>
+                    <td>' . $row["request_date"] . '</td>
+                    <td>' . $row["document_type"] . '</td>
+                    <td>' . $row["document_series"] . '</td>
+                    <td>' . $row["document_number"] . '</td>
+                    <td>' . $row["document_date"] . '</td>
+                    <td>' . $row["document_issue"] . '</td>
+                    <td>' . $row["phone"] . '</td>
+                    <td>' . $row["work_place"] . '</td>
+                    <td class =table__content-comment>' . $row["comment"] . '</td>
+                </tr>
+               ';
+            }
+
+            echo $response;
+           
+        }
+
+        return $response = 'Not data found';
+    }
     /* 
     setHeaders
     Устанавливает специальные заголовки для загрузки файла
